@@ -1,0 +1,42 @@
+name: Trigger auto deployment for fe034409westus
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ sc-westus-034409 ]
+    paths:
+    - '**'
+    - '.github/workflows/fe034409westus-AutoDeployTrigger-c19219e4-5677-4a49-99ac-825a5de19d30.yml'
+
+  # Allow mannually trigger 
+  workflow_dispatch:
+      
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.FE034409WESTUS_AZURE_CREDENTIALS }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v1
+        with:
+          appSourcePath: ${{ github.workspace }} 
+          registryUrl: cappsinttestregistryprivate.azurecr.io
+          registryUsername: ${{ secrets.FE034409WESTUS_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.FE034409WESTUS_REGISTRY_PASSWORD }}
+          containerAppName: fe034409westus
+          resourceGroup: nonvnet-nonlong-westus-202307310337-rg
+          imageToBuild: cappsinttestregistryprivate.azurecr.io/fe034409westus:${{ github.sha }}
+          
+
+     
+
